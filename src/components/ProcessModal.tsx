@@ -133,7 +133,53 @@ const appendApiDataToExcel = (apiData: any[]) => {
 
 
 
- const transfer_dfds = async () => {
+//  const transfer_dfds = async () => {
+//   if (files.length === 0) {
+//     alert("Veuillez ajouter au moins un PDF !");
+//     return;
+//   }
+
+//   const formData = new FormData();
+//   files.forEach((file) => {
+//     formData.append("files", file); // clé "files" correspond à request.files.getlist('files') côté Flask
+//   });
+
+//   try {
+//     setIsProcessing(true);
+
+//     const response = await axios.post("https://malakhouali05.pythonanywhere.com/transfer_dfds", formData, {
+//       headers: {
+//         "Content-Type": "multipart/form-data",
+//       },
+//     });
+
+//     if (response.data.status === "success") {
+     
+//       console.log(response.data.data); // tableau avec toutes les lignes extraites
+//               setIsProcessing(true);
+//                appendApiDataToExcel(response.data.data);
+//           // Simulation de l'API
+//           await new Promise(resolve => setTimeout(resolve, 3000));
+          
+//           setIsProcessing(false);
+//           setIsComplete(true);
+          
+//           toast({
+//             title: "Traitement terminé",
+//             description: "Vos factures ont été traitées avec succès!",
+//           }); 
+//           alert(`✅ ${response.data.rows} factures traitées avec succès !`);
+//     } else {
+//       alert(`❌ Erreur : ${response.data.message}`);
+//     }
+//   } catch (error: any) {
+//     console.error("Erreur API :", error.response || error.message);
+//     alert("❌ Erreur lors de l'envoi des fichiers PDF");
+//   } finally {
+//     setIsProcessing(false);
+//   }
+// };
+const transfer_dfds = async () => {
   if (files.length === 0) {
     alert("Veuillez ajouter au moins un PDF !");
     return;
@@ -141,11 +187,12 @@ const appendApiDataToExcel = (apiData: any[]) => {
 
   const formData = new FormData();
   files.forEach((file) => {
-    formData.append("files", file); // clé "files" correspond à request.files.getlist('files') côté Flask
+    formData.append("files", file);
   });
 
   try {
     setIsProcessing(true);
+    setIsComplete(false); // Réinitialiser l'état de complétion
 
     const response = await axios.post("https://malakhouali05.pythonanywhere.com/transfer_dfds", formData, {
       headers: {
@@ -154,27 +201,43 @@ const appendApiDataToExcel = (apiData: any[]) => {
     });
 
     if (response.data.status === "success") {
-     
-      console.log(response.data.data); // tableau avec toutes les lignes extraites
-              setIsProcessing(true);
-               appendApiDataToExcel(response.data.data);
-          // Simulation de l'API
-          await new Promise(resolve => setTimeout(resolve, 3000));
-          
-          setIsProcessing(false);
-          setIsComplete(true);
-          
-          toast({
-            title: "Traitement terminé",
-            description: "Vos factures ont été traitées avec succès!",
-          }); 
-          alert(`✅ ${response.data.rows} factures traitées avec succès !`);
+      console.log("Données reçues:", response.data.data);
+      
+      // Traitement des données
+      await appendApiDataToExcel(response.data.data);
+      
+      // Simulation de traitement (si nécessaire)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setIsComplete(true);
+      
+      toast({
+        title: "Traitement terminé",
+        description: "Vos factures ont été traitées avec succès!",
+      }); 
+      
+      alert(`✅ ${response.data.rows} facture(s) traitée(s) avec succès !`);
     } else {
       alert(`❌ Erreur : ${response.data.message}`);
     }
   } catch (error: any) {
-    console.error("Erreur API :", error.response || error.message);
-    alert("❌ Erreur lors de l'envoi des fichiers PDF");
+    console.error("Erreur API détaillée:", error);
+    
+    // Gestion plus détaillée des erreurs
+    if (error.response) {
+      // Erreur de réponse du serveur
+      console.error("Status:", error.response.status);
+      console.error("Data:", error.response.data);
+      alert(`❌ Erreur serveur (${error.response.status}): ${error.response.data.message || "Erreur lors du traitement"}`);
+    } else if (error.request) {
+      // Erreur de réseau
+      console.error("Requête sans réponse:", error.request);
+      alert("❌ Erreur réseau - Impossible de contacter le serveur");
+    } else {
+      // Autres erreurs
+      console.error("Erreur:", error.message);
+      alert("❌ Erreur lors de l'envoi des fichiers PDF");
+    }
   } finally {
     setIsProcessing(false);
   }
