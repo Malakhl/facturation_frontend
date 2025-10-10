@@ -192,7 +192,6 @@ const transfer_dfds = async () => {
 
   try {
     setIsProcessing(true);
-    setIsComplete(false); // Réinitialiser l'état de complétion
 
     const response = await axios.post("https://malakhouali05.pythonanywhere.com/transfer_dfds", formData, {
       headers: {
@@ -203,42 +202,42 @@ const transfer_dfds = async () => {
     if (response.data.status === "success") {
       console.log("Données reçues:", response.data.data);
       
-      // Traitement des données
-      await appendApiDataToExcel(response.data.data);
+      // Extraire toutes les factures de tous les fichiers
+      const allInvoices = [];
+      Object.values(response.data.data).forEach(invoiceArray => {
+        if (Array.isArray(invoiceArray)) {
+          allInvoices.push(...invoiceArray);
+        }
+      });
+
+      console.log(`${allInvoices.length} factures à traiter:`, allInvoices);
       
-      // Simulation de traitement (si nécessaire)
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setIsComplete(true);
-      
-      toast({
-        title: "Traitement terminé",
-        description: "Vos factures ont été traitées avec succès!",
-      }); 
-      
-      alert(`✅ ${response.data.rows} facture(s) traitée(s) avec succès !`);
+      if (allInvoices.length > 0) {
+        // Ajouter les données à Excel
+        appendApiDataToExcel(allInvoices);
+        
+        // Simulation de l'API
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        
+        setIsProcessing(false);
+        setIsComplete(true);
+        
+        toast({
+          title: "Traitement terminé",
+          description: `Vos ${allInvoices.length} factures ont été traitées avec succès!`,
+        }); 
+        alert(`✅ ${allInvoices.length} factures traitées avec succès !`);
+      } else {
+        setIsProcessing(false);
+        alert("❌ Aucune facture valide trouvée dans les fichiers PDF");
+      }
     } else {
+      setIsProcessing(false);
       alert(`❌ Erreur : ${response.data.message}`);
     }
   } catch (error: any) {
-    console.error("Erreur API détaillée:", error);
-    
-    // Gestion plus détaillée des erreurs
-    if (error.response) {
-      // Erreur de réponse du serveur
-      console.error("Status:", error.response.status);
-      console.error("Data:", error.response.data);
-      alert(`❌ Erreur serveur (${error.response.status}): ${error.response.data.message || "Erreur lors du traitement"}`);
-    } else if (error.request) {
-      // Erreur de réseau
-      console.error("Requête sans réponse:", error.request);
-      alert("❌ Erreur réseau - Impossible de contacter le serveur");
-    } else {
-      // Autres erreurs
-      console.error("Erreur:", error.message);
-      alert("❌ Erreur lors de l'envoi des fichiers PDF");
-    }
-  } finally {
+    console.error("Erreur API :", error.response || error.message);
+    alert("❌ Erreur lors de l'envoi des fichiers PDF");
     setIsProcessing(false);
   }
 };
