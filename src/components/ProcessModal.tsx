@@ -539,7 +539,7 @@ const handleDownload = () => {
                       setIsProcessing(true);
 
                       // 2️⃣ Appeler l'API
-                      if (invoiceType.title === "Agence") {
+                      if (invoiceType.title === "Siège") {
                         await transfere_agence();
 
                       } else if (invoiceType.title === "DFDS") {
