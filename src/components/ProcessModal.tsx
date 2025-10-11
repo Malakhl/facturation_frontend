@@ -529,11 +529,11 @@ const handleDownload = () => {
                         </Label>
                         <div className="flex gap-2">
                           <Input
-                            placeholder="URL du PDF ou nom du fichier"
-                            value={input || ""}
-                            onChange={(e) => handlePdfInputChange(index, e.target.value)}
-                            className="flex-1"
-                          />
+                              placeholder=""
+                              value={input || ""}
+                              className="flex-1"
+                              readOnly
+                            />
                           <Button
                             variant="outline"
                             size="icon"
