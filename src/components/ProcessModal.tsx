@@ -423,7 +423,14 @@ const handleDownload = () => {
     // 🔹 Convertir et télécharger le fichier
     const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const blob = new Blob([wbout], { type: "application/octet-stream" });
-    saveAs(blob, "factures.xlsx");
+     if (invoiceType.title === 'DFDS') {
+     saveAs(blob, "DFDS.xlsx");
+      
+    } else if (invoiceType.title === 'Siège') {
+     saveAs(blob, "Siege.xlsx");
+    } else {
+      saveAs(blob, "AML.xlsx");
+    }
 
     // 🔹 Message de succès
     toast({
