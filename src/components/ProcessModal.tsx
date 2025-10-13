@@ -118,7 +118,7 @@ const appendApiDataToExcel = (apiData: any[]) => {
             title: "Traitement terminé",
             description: "Vos factures ont été traitées avec succès!",
           }); 
-          alert(`✅ ${response.data.rows} factures traitées avec succès !`);
+          alert(`✅ ${response.data.rows} PDFS traitées avec succès !`);
     } else {
       alert(`❌ Erreur : ${response.data.message}`);
     }
@@ -226,7 +226,7 @@ const transfer_dfds = async () => {
           title: "Traitement terminé",
           description: `Vos ${allInvoices.length} factures ont été traitées avec succès!`,
         }); 
-        alert(`✅ ${allInvoices.length} factures traitées avec succès !`);
+        alert(`✅ ${allInvoices.length} PDFS traitées avec succès !`);
       } else {
         setIsProcessing(false);
         alert("❌ Aucune facture valide trouvée dans les fichiers PDF");
@@ -330,7 +330,7 @@ const transfere_Aml = async () => {
         title: "Traitement terminé",
         description: "Vos factures AML ont été traitées avec succès !",
       });
-      alert(`✅ ${response.data.rows} factures traitées avec succès !`);
+      alert(`✅ ${response.data.rows} PDFS traitées avec succès !`);
     } else {
       alert(`❌ Erreur : ${response.data.message}`);
     }
@@ -572,7 +572,7 @@ const handleDownload = () => {
               <div className="space-y-6">
                 <div className="text-center">
                   <h3 className="text-lg font-semibold mb-2">
-                    Ajoutez vos {pdfCount} factures PDF
+                    Ajoutez vos {pdfCount} PDFS
                   </h3>
                   <p className="text-muted-foreground text-sm">
                     Vous pouvez uploader des fichiers ou saisir des liens
