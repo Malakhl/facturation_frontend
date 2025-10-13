@@ -97,7 +97,7 @@ const appendApiDataToExcel = (apiData: any[]) => {
   try {
     setIsProcessing(true);
 
-    const response = await axios.post("https://malakhouali05.pythonanywhere.com/transfer_agence", formData, {
+    const response = await axios.post("http://127.0.0.1:8088/transfer_agence", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -143,11 +143,11 @@ const appendApiDataToExcel = (apiData: any[]) => {
 //   files.forEach((file) => {
 //     formData.append("files", file); // clé "files" correspond à request.files.getlist('files') côté Flask
 //   });
-
+// // https://malakhouali05.pythonanywhere.com
 //   try {
 //     setIsProcessing(true);
 
-//     const response = await axios.post("https://malakhouali05.pythonanywhere.com/transfer_dfds", formData, {
+//     const response = await axios.post("http://127.0.0.1:8088/transfer_dfds", formData, {
 //       headers: {
 //         "Content-Type": "multipart/form-data",
 //       },
@@ -193,7 +193,7 @@ const transfer_dfds = async () => {
   try {
     setIsProcessing(true);
 
-    const response = await axios.post("https://malakhouali05.pythonanywhere.com/transfer_dfds", formData, {
+    const response = await axios.post("http://127.0.0.1:8088/transfer_dfds", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -253,7 +253,7 @@ const transfer_dfds = async () => {
 //   try {
 //     setIsProcessing(true);
 
-//     const response = await axios.post("https://malakhouali05.pythonanywhere.com/transfer_aml", formData, {
+//     const response = await axios.post("http://127.0.0.1:8088/transfer_aml", formData, {
 //       headers: { "Content-Type": "multipart/form-data" },
 //     });
 
@@ -301,7 +301,7 @@ const transfere_Aml = async () => {
   try {
     setIsProcessing(true);
 
-    const response = await axios.post("https://malakhouali05.pythonanywhere.com/transfer_aml", formData, {
+    const response = await axios.post("http://127.0.0.1:8088/transfer_aml", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
@@ -367,29 +367,81 @@ const transfere_Aml = async () => {
 
 //   resetModal();
 // };
+// const handleDownload = () => {
+//   if (!excelData || excelData.length === 0) {
+//     alert("Aucune donnée à télécharger !");
+//     return;
+//   }
+
+//   // Création d'une nouvelle feuille Excel avec uniquement excelData
+//   const ws = XLSX.utils.json_to_sheet(excelData);
+//   const wb = XLSX.utils.book_new();
+//   XLSX.utils.book_append_sheet(wb, ws, "Factures");
+
+//   // Conversion en binaire et téléchargement
+//   const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+//   const blob = new Blob([wbout], { type: "application/octet-stream" });
+//   saveAs(blob, "factures.xlsx");
+
+//   toast({
+//     title: "Téléchargement réussi",
+//     description: "Un nouveau fichier Excel a été généré.",
+//   });
+//   resetModal();
+// };
 const handleDownload = () => {
+  // 🔹 Vérifier que des données existent
   if (!excelData || excelData.length === 0) {
     alert("Aucune donnée à télécharger !");
     return;
   }
 
-  // Création d'une nouvelle feuille Excel avec uniquement excelData
-  const ws = XLSX.utils.json_to_sheet(excelData);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Factures");
+  try {
+    // 🔹 Déterminer les headers selon le type de facture
+    let headers = [];
+    
+    if (invoiceType.title === 'DFDS') {
+      headers = ["N_CL_Transp","N_DOC_Externe", "Remorque","Date","Total", "tracteur",  "Destination", ];
+      
+    } else if (invoiceType.title === 'Siège') {
+      headers = ["N_CL_Transp","N_DOC_Externe", "Remorque", "Date", "total","Tracteur", "Destination",  "prestation"];
+    } else {
+      headers = ["N_CL_Transp", "N_DOC_Externe", "Remorque", "Date", "Total" ,"Destination"];
+    }
 
-  // Conversion en binaire et téléchargement
-  const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-  const blob = new Blob([wbout], { type: "application/octet-stream" });
-  saveAs(blob, "factures.xlsx");
+    // 🔹 Créer la feuille Excel en forçant l'ordre des colonnes
+    const ws = XLSX.utils.json_to_sheet(excelData, { header: headers });
 
-  toast({
-    title: "Téléchargement réussi",
-    description: "Un nouveau fichier Excel a été généré.",
-  });
-  resetModal();
+    // 🔹 Ajuster la largeur des colonnes pour un meilleur affichage
+    const colWidths = headers.map(header => ({ width: 15 }));
+    ws['!cols'] = colWidths;
+
+    // 🔹 Créer un nouveau classeur
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Factures");
+
+    // 🔹 Convertir et télécharger le fichier
+    const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([wbout], { type: "application/octet-stream" });
+    saveAs(blob, "factures.xlsx");
+
+    // 🔹 Message de succès
+    toast({
+      title: "Téléchargement réussi ✅",
+      description: "Un nouveau fichier Excel a été généré avec succès.",
+    });
+
+    // 🔹 Réinitialiser la modale si présente
+    if (resetModal) resetModal();
+
+  } catch (error) {
+    console.error("Erreur lors du téléchargement :", error);
+    toast({
+      title: "Erreur ❌",
+      description: "Une erreur est survenue lors de la génération du fichier Excel.",
+    });
+  }
 };
-
   const resetModal = () => {
     setStep(1);
     setExcelFile(null);
@@ -482,7 +534,7 @@ const handleDownload = () => {
                 <Card className="p-6 bg-card/50 border-border/20">
                   <div className="space-y-4">
                     <Label htmlFor="pdf-count" className="text-base font-medium">
-                      Nombre de factures PDF
+                      Nombre de Fichier PDF
                     </Label>
                     <Select onValueChange={handlePdfCountChange} value={pdfCount}>
                       <SelectTrigger>
@@ -491,7 +543,7 @@ const handleDownload = () => {
                       <SelectContent>
                         {[1, 2, 3, 4, 5, 10, 15, 20].map((num) => (
                           <SelectItem key={num} value={num.toString()}>
-                            {num} facture{num > 1 ? 's' : ''}
+                            {num} pdf{num > 1 ? 's' : ''}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -587,7 +639,7 @@ const handleDownload = () => {
                   <h3 className="text-lg font-semibold">Prêt pour le traitement</h3>
                   <div className="text-sm text-muted-foreground space-y-1">
                     <p>Fichier Excel: {excelFile?.name}</p>
-                    <p>Nombre de factures: {pdfCount}</p>
+                    <p>Nombre de PDF: {pdfCount}</p>
                     <p>Type: {invoiceType.title}</p>
                   </div>
                 </div>
