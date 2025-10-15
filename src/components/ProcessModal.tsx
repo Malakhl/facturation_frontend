@@ -97,7 +97,7 @@ const appendApiDataToExcel = (apiData: any[]) => {
   try {
     setIsProcessing(true);
 
-    const response = await axios.post("http://127.0.0.1:8088/transfer_agence", formData, {
+    const response = await axios.post("https://malakhouali05.pythonanywhere.com/transfer_agence", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -193,7 +193,7 @@ const transfer_dfds = async () => {
   try {
     setIsProcessing(true);
 
-    const response = await axios.post("http://127.0.0.1:8088/transfer_dfds", formData, {
+    const response = await axios.post("https://malakhouali05.pythonanywhere.com/transfer_dfds", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -301,7 +301,7 @@ const transfere_Aml = async () => {
   try {
     setIsProcessing(true);
 
-    const response = await axios.post("http://127.0.0.1:8088/transfer_aml", formData, {
+    const response = await axios.post("https://malakhouali05.pythonanywhere.com/transfer_aml", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
